@@ -23,17 +23,17 @@ body {
     color: #fff;
 }
 
-/* ---------- экраны ---------- */
+/* ---------- общий контейнер ---------- */
 .screen {
     width: 420px;
     max-width: 100%;
     padding: 30px 20px;
     border-radius: 20px;
-    background: rgba(0,0,0,0.65);
+    background: transparent; /* ⬅ фон убран у всех экранов */
     text-align: center;
 }
 
-/* ---------- старт ---------- */
+/* ---------- стартовый экран ---------- */
 #startScreen h1 {
     color: #ff5cff;
     margin-bottom: 30px;
@@ -54,7 +54,7 @@ body {
     animation: pulse 1.5s infinite;
 }
 
-/* ---------- игра ---------- */
+/* ---------- экран игры ---------- */
 #gameScreen {
     display: none;
 }
@@ -133,7 +133,7 @@ button.secondary {
     cursor: pointer;
 }
 
-/* ---------- история ---------- */
+/* ---------- история со скроллом ---------- */
 .history {
     margin-top: 20px;
     max-height: 78px; /* ~3 строки */
@@ -166,7 +166,7 @@ button.secondary {
 
 <body>
 
-<!-- старт -->
+<!-- стартовый экран -->
 <div class="screen" id="startScreen">
     <h1>Выбери режим</h1>
     <button class="mode-btn" onclick="startGame('🎉 Вечеринка')">🎉 Вечеринка</button>
@@ -174,7 +174,7 @@ button.secondary {
     <button class="mode-btn" onclick="startGame('🎂 День рождения')">🎂 День рождения</button>
 </div>
 
-<!-- игра -->
+<!-- экран игры -->
 <div class="screen" id="gameScreen">
     <h2 id="modeTitle"></h2>
 
@@ -267,8 +267,6 @@ function renderHistory(arr) {
         s.textContent = n;
         historyEl.appendChild(s);
     });
-
-    // 🔥 АВТОПРОКРУТКА ВНИЗ
     historyEl.scrollTop = historyEl.scrollHeight;
 }
 
