@@ -228,7 +228,7 @@ button.main {
     <h2 id="modeTitle"></h2>
 
     <div class="counter">
-        Осталось песен: <span id="remaining">100</span>
+        Осталось песен: <span id="remaining">0</span>
     </div>
 
     <div id="result">—</div>
@@ -369,11 +369,26 @@ const checkIcon = `
 <path d="M5 13l4 4L19 7"/>
 </svg>`;
 
+window.addEventListener('load', () => {
+    startScreen.style.display = 'block';
+    gameScreen.style.display = 'none';
+    sessionStorage.removeItem('used');
+    resetVisual();
+});
+
+function resetVisual() {
+    resultEl.textContent = '—';
+    wordEl.textContent = '';
+    historyEl.innerHTML = '';
+    remainingEl.textContent = TOTAL;
+    copyBtn.style.display = 'none';
+}
+
 function startGame(mode) {
+    resetVisual();
     startScreen.style.display = 'none';
     gameScreen.style.display = 'block';
     modeTitle.textContent = mode;
-    updateRemaining();
 }
 
 function backToModes() {
@@ -420,11 +435,7 @@ function updateRemaining() {
 
 function resetGame() {
     sessionStorage.removeItem('used');
-    resultEl.textContent = '—';
-    wordEl.textContent = '';
-    historyEl.innerHTML = '';
-    remainingEl.textContent = TOTAL;
-    copyBtn.style.display = 'none';
+    resetVisual();
 }
 
 function copyWord() {
