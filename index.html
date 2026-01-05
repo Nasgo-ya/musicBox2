@@ -5,6 +5,11 @@
 <title>Disco Randomizer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Geologica -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@300;400;600;700&display=swap" rel="stylesheet">
+
 <style>
 @keyframes pulse {
     0% { box-shadow: 0 0 10px #00fff0; }
@@ -19,7 +24,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: Arial, sans-serif;
+    font-family: 'Geologica', system-ui, sans-serif;
     color: #fff;
 }
 
@@ -203,7 +208,6 @@ button.main {
 
 <body>
 
-<!-- старт -->
 <div class="screen" id="startScreen">
     <h1>Выбери режим</h1>
     <button class="mode-btn" onclick="startGame('Вечеринка')">Вечеринка</button>
@@ -211,7 +215,6 @@ button.main {
     <button class="mode-btn" onclick="startGame('День рождения')">День рождения</button>
 </div>
 
-<!-- игра -->
 <div class="screen" id="gameScreen">
     <div class="top-controls">
         <div class="icon-btn" onclick="backToModes()" data-tooltip="Назад">
