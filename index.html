@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Disco Randomizer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+@keyframes pulse {
+    0% { box-shadow: 0 0 10px #00fff0; }
+    50% { box-shadow: 0 0 30px #ff00ff; }
+    100% { box-shadow: 0 0 10px #00fff0; }
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(circle at top, #1a002a, #000);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial, sans-serif;
+    color: #fff;
+}
+
+/* ---------- экраны ---------- */
+.screen {
+    width: 420px;
+    max-width: 100%;
+    padding: 30px 20px;
+    border-radius: 20px;
+    background: rgba(0,0,0,0.65);
+    text-align: center;
+}
+
+/* ---------- старт ---------- */
+#startScreen h1 {
+    color: #ff5cff;
+    margin-bottom: 30px;
+}
+
+.mode-btn {
+    width: 100%;
+    max-width: 280px;
+    margin: 12px auto;
+    padding: 18px 0;
+    border-radius: 50px;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #000;
+    background: linear-gradient(45deg, #ff00ff, #00fff0);
+    animation: pulse 1.5s infinite;
+}
+
+/* ---------- игра ---------- */
+#gameScreen {
+    display: none;
+}
+
+h2 {
+    color: #ff5cff;
+}
+
+.range {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 15px 0;
+}
+
+.range input {
+    width: 80px;
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
+    text-align: center;
+}
+
+#result {
+    font-size: 72px;
+    margin: 20px 0 5px;
+    color: #00fff0;
+    text-shadow: 0 0 30px #00fff0;
+}
+
+.word-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    min-height: 32px;
+}
+
+#word {
+    font-size: 24px;
+    color: #ff5cff;
+}
+
+.copy-btn {
+    display: none;
+    cursor: pointer;
+    color: #00fff0;
+}
+
+/* ---------- кнопки ---------- */
+button.main {
+    width: 100%;
+    max-width: 280px;
+    margin: 10px auto 6px;
+    padding: 18px 0;
+    border-radius: 50px;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #000;
+    background: linear-gradient(45deg, #ff00ff, #00fff0);
+    animation: pulse 1.5s infinite;
+}
+
+button.secondary {
+    width: 100%;
+    max-width: 280px;
+    margin: 0 auto 8px;
+    padding: 6px 0;
+    background: transparent;
+    color: #aaa;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* ---------- история ---------- */
+.history {
+    margin-top: 20px;
+    max-height: 78px; /* ~3 строки */
+    overflow-y: auto;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 10px;
+
+    scrollbar-width: thin;
+    scrollbar-color: #00fff0 transparent;
+}
+
+.history::-webkit-scrollbar {
+    width: 6px;
+}
+.history::-webkit-scrollbar-thumb {
+    background: #00fff0;
+    border-radius: 10px;
+}
+
+.history span {
+    display: inline-block;
+    margin: 4px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: rgba(0,255,240,0.15);
+    color: #00fff0;
+}
+</style>
+</head>
+
+<body>
+
+<!-- старт -->
+<div class="screen" id="startScreen">
+    <h1>Выбери режим</h1>
+    <button class="mode-btn" onclick="startGame('🎉 Вечеринка')">🎉 Вечеринка</button>
+    <button class="mode-btn" onclick="startGame('🎄 Новый год')">🎄 Новый год</button>
+    <button class="mode-btn" onclick="startGame('🎂 День рождения')">🎂 День рождения</button>
+</div>
+
+<!-- игра -->
+<div class="screen" id="gameScreen">
+    <h2 id="modeTitle"></h2>
+
+    <div class="range">
+        <input id="minInput" type="number" value="1" min="1" max="100">
+        <input id="maxInput" type="number" value="100" min="1" max="100">
+    </div>
+
+    <div id="result">—</div>
+
+    <div class="word-wrap">
+        <div id="word"></div>
+        <div class="copy-btn" id="copyBtn" onclick="copyWord()">📋</div>
+    </div>
+
+    <button class="main" onclick="generate()">DROP THE BEAT</button>
+    <button class="secondary" onclick="resetGame()">⟲ Сбросить игру</button>
+    <button class="secondary" onclick="backToModes()">← Назад к выбору режима</button>
+
+    <div class="history" id="history"></div>
+</div>
+
+<script>
+const words = [
+"Реклама","абсиды","алавит","асемия","ацетин","ацидит","байльи","бензин","бербер","бербет",
+"блошак","боярка","влерец","выклик","выплыв","выстой","гаваец","гамиты","геофит","гердан",
+"голубь","гомфоз","гончак","гребля","дарога","даурка","дергем","детдом","диалер","домком",
+"дриона","жёрнов","задача","зестер","ибикон","иновер","иомуды","калено","калибр","караим",
+"качели","кишлак","клиент","коллар","кондёр","корзно","корред","косуля","крытье","крюшон",
+"кудель","лавдан","леккаж","летрин","маркёр","мессур","мехцех","моголь","мороит","морфоз",
+"музеум","мураль","натуга","ормузд","пажизм","пиринг","подвод","подзор","продор","проноя",
+"размёт","резерв","резчик","рейнец","рябина","садист","сатори","свиток","сестер","ситком",
+"снеток","сурнай","схемка","таблин","тамтам","тапиро","томище","трепло","тюряга","утюжка",
+"флоэма","фурдит","халава","хиллит","чеддер","шассер","шквара","эпитип","этазол","этолог","юнофоб"
+];
+
+const startScreen = document.getElementById('startScreen');
+const gameScreen = document.getElementById('gameScreen');
+const modeTitle = document.getElementById('modeTitle');
+const resultEl = document.getElementById('result');
+const wordEl = document.getElementById('word');
+const historyEl = document.getElementById('history');
+const copyBtn = document.getElementById('copyBtn');
+const minInput = document.getElementById('minInput');
+const maxInput = document.getElementById('maxInput');
+
+function startGame(mode) {
+    startScreen.style.display = 'none';
+    gameScreen.style.display = 'block';
+    modeTitle.textContent = mode;
+}
+
+function backToModes() {
+    resetGame();
+    gameScreen.style.display = 'none';
+    startScreen.style.display = 'block';
+}
+
+function getKey(min, max) {
+    return `used_${min}_${max}`;
+}
+
+function generate() {
+    const min = +minInput.value;
+    const max = +maxInput.value;
+    if (min < 1 || max > 100 || min >= max) return;
+
+    let used = JSON.parse(sessionStorage.getItem(getKey(min, max))) || [];
+    if (used.length >= (max - min + 1)) return;
+
+    let num;
+    do {
+        num = Math.floor(Math.random() * (max - min + 1)) + min;
+    } while (used.includes(num));
+
+    used.push(num);
+    sessionStorage.setItem(getKey(min, max), JSON.stringify(used));
+
+    resultEl.textContent = num;
+    wordEl.textContent = words[num - 1];
+    copyBtn.style.display = 'inline';
+
+    renderHistory(used);
+}
+
+function renderHistory(arr) {
+    historyEl.innerHTML = '';
+    arr.forEach(n => {
+        const s = document.createElement('span');
+        s.textContent = n;
+        historyEl.appendChild(s);
+    });
+
+    // 🔥 АВТОПРОКРУТКА ВНИЗ
+    historyEl.scrollTop = historyEl.scrollHeight;
+}
+
+function resetGame() {
+    sessionStorage.clear();
+    resultEl.textContent = '—';
+    wordEl.textContent = '';
+    historyEl.innerHTML = '';
+    copyBtn.style.display = 'none';
+}
+
+function copyWord() {
+    if (!wordEl.textContent) return;
+    navigator.clipboard.writeText(wordEl.textContent);
+    copyBtn.textContent = '✓';
+    setTimeout(() => copyBtn.textContent = '📋', 1000);
+}
+</script>
+
+</body>
+</html>
