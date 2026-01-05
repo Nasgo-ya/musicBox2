@@ -23,17 +23,15 @@ body {
     color: #fff;
 }
 
-/* ---------- общий контейнер ---------- */
 .screen {
     width: 420px;
     max-width: 100%;
-    padding: 30px 20px;
-    border-radius: 20px;
-    background: transparent; /* ⬅ фон убран у всех экранов */
+    padding: 30px 20px 40px;
     text-align: center;
+    position: relative;
 }
 
-/* ---------- стартовый экран ---------- */
+/* ---------- старт ---------- */
 #startScreen h1 {
     color: #ff5cff;
     margin-bottom: 30px;
@@ -54,29 +52,72 @@ body {
     animation: pulse 1.5s infinite;
 }
 
-/* ---------- экран игры ---------- */
-#gameScreen {
-    display: none;
-}
+/* ---------- игра ---------- */
+#gameScreen { display: none; }
 
-h2 {
-    color: #ff5cff;
-}
-
-.range {
+.top-controls {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
     display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin: 15px 0;
+    justify-content: space-between;
 }
 
-.range input {
-    width: 80px;
-    padding: 10px;
-    font-size: 18px;
-    border-radius: 10px;
-    border: none;
-    text-align: center;
+.icon-btn {
+    width: 34px;
+    height: 34px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.icon-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: #00fff0;
+    stroke-width: 2;
+    fill: none;
+}
+
+/* ---------- tooltip ---------- */
+.icon-btn::after,
+.copy-btn::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -34px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.8);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+}
+
+.icon-btn:hover::after,
+.copy-btn:hover::after {
+    opacity: 1;
+}
+
+h2 { color: #ff5cff; }
+
+.counter {
+    margin: 10px 0 20px;
+    font-size: 16px;
+    color: #aaa;
+}
+
+.counter span {
+    color: #00fff0;
+    font-weight: bold;
 }
 
 #result {
@@ -86,30 +127,39 @@ h2 {
     text-shadow: 0 0 30px #00fff0;
 }
 
+/* ---------- слово + копирование ---------- */
 .word-wrap {
-    display: flex;
-    justify-content: center;
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    min-height: 32px;
+    gap: 18px;
+    min-height: 44px;
+    margin-bottom: 20px;
 }
 
 #word {
-    font-size: 24px;
+    font-size: 22px;
     color: #ff5cff;
 }
 
 .copy-btn {
     display: none;
     cursor: pointer;
-    color: #00fff0;
+    position: relative;
 }
 
-/* ---------- кнопки ---------- */
+.copy-btn svg {
+    width: 22px;
+    height: 22px;
+    stroke: #00fff0;
+    stroke-width: 2;
+    fill: none;
+}
+
+/* ---------- кнопка ---------- */
 button.main {
     width: 100%;
     max-width: 280px;
-    margin: 10px auto 6px;
+    margin: 30px auto 0;
     padding: 18px 0;
     border-radius: 50px;
     border: none;
@@ -121,26 +171,13 @@ button.main {
     animation: pulse 1.5s infinite;
 }
 
-button.secondary {
-    width: 100%;
-    max-width: 280px;
-    margin: 0 auto 8px;
-    padding: 6px 0;
-    background: transparent;
-    color: #aaa;
-    border: none;
-    font-size: 14px;
-    cursor: pointer;
-}
-
-/* ---------- история со скроллом ---------- */
+/* ---------- история ---------- */
 .history {
     margin-top: 20px;
-    max-height: 78px; /* ~3 строки */
+    max-height: 78px;
     overflow-y: auto;
     border-top: 1px solid rgba(255,255,255,0.1);
     padding-top: 10px;
-
     scrollbar-width: thin;
     scrollbar-color: #00fff0 transparent;
 }
@@ -166,50 +203,151 @@ button.secondary {
 
 <body>
 
-<!-- стартовый экран -->
+<!-- старт -->
 <div class="screen" id="startScreen">
     <h1>Выбери режим</h1>
-    <button class="mode-btn" onclick="startGame('🎉 Вечеринка')">🎉 Вечеринка</button>
-    <button class="mode-btn" onclick="startGame('🎄 Новый год')">🎄 Новый год</button>
-    <button class="mode-btn" onclick="startGame('🎂 День рождения')">🎂 День рождения</button>
+    <button class="mode-btn" onclick="startGame('Вечеринка')">Вечеринка</button>
+    <button class="mode-btn" onclick="startGame('Новый год')">Новый год</button>
+    <button class="mode-btn" onclick="startGame('День рождения')">День рождения</button>
 </div>
 
-<!-- экран игры -->
+<!-- игра -->
 <div class="screen" id="gameScreen">
+    <div class="top-controls">
+        <div class="icon-btn" onclick="backToModes()" data-tooltip="Назад">
+            <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        </div>
+        <div class="icon-btn" onclick="resetGame()" data-tooltip="Сбросить">
+            <svg viewBox="0 0 24 24">
+                <path d="M3 12a9 9 0 1 0 3-6.7"/>
+                <path d="M3 3v6h6"/>
+            </svg>
+        </div>
+    </div>
+
     <h2 id="modeTitle"></h2>
 
-    <div class="range">
-        <input id="minInput" type="number" value="1" min="1" max="100">
-        <input id="maxInput" type="number" value="100" min="1" max="100">
+    <div class="counter">
+        Осталось песен: <span id="remaining">100</span>
     </div>
 
     <div id="result">—</div>
 
     <div class="word-wrap">
         <div id="word"></div>
-        <div class="copy-btn" id="copyBtn" onclick="copyWord()">📋</div>
+        <div class="copy-btn" id="copyBtn" onclick="copyWord()" data-tooltip="Копировать"></div>
     </div>
 
-    <button class="main" onclick="generate()">DROP THE BEAT</button>
-    <button class="secondary" onclick="resetGame()">⟲ Сбросить игру</button>
-    <button class="secondary" onclick="backToModes()">← Назад к выбору режима</button>
-
     <div class="history" id="history"></div>
+
+    <button class="main" onclick="generate()">DROP THE BEAT</button>
 </div>
 
 <script>
 const words = [
-"Реклама","абсиды","алавит","асемия","ацетин","ацидит","байльи","бензин","бербер","бербет",
-"блошак","боярка","влерец","выклик","выплыв","выстой","гаваец","гамиты","геофит","гердан",
-"голубь","гомфоз","гончак","гребля","дарога","даурка","дергем","детдом","диалер","домком",
-"дриона","жёрнов","задача","зестер","ибикон","иновер","иомуды","калено","калибр","караим",
-"качели","кишлак","клиент","коллар","кондёр","корзно","корред","косуля","крытье","крюшон",
-"кудель","лавдан","леккаж","летрин","маркёр","мессур","мехцех","моголь","мороит","морфоз",
-"музеум","мураль","натуга","ормузд","пажизм","пиринг","подвод","подзор","продор","проноя",
-"размёт","резерв","резчик","рейнец","рябина","садист","сатори","свиток","сестер","ситком",
-"снеток","сурнай","схемка","таблин","тамтам","тапиро","томище","трепло","тюряга","утюжка",
-"флоэма","фурдит","халава","хиллит","чеддер","шассер","шквара","эпитип","этазол","этолог","юнофоб"
+"The Beatles - Yesterday",
+"Пол Маккартни - No More Lonely Nights",
+"Элвис Пресли - Love Me Tender",
+"The Mamas and The Papas - California Dreamin'",
+"Procol Harum - A Whiter Shade Of Pale",
+"The Kinks - You Really Got Me",
+"The Zombies - She's Not There",
+"King Crimson - 21st Century Schizoid Man",
+"Cream - Sunshine Of Your Love",
+"The Beach Boys - Good Vibrations",
+"The Moody Blues - Nights in White Satin",
+"Manfred Mann - Mighty Quinn",
+"The Troggs - Wild Thing",
+"The Searchers - Sweets For My Sweet",
+"Carpenters - Goodbye To Love",
+"Bread - Guitar Man",
+"Bread - Lost Without Your Love",
+"Принс - Purple Rain",
+"Herman's Hermits - No Milk Today",
+"Electric Light Orchestra - Don't Bring Me Down",
+"Electric Light Orchestra - Ticket To the Moon",
+"Chicago - 25 or 6 to 4",
+"Jethro Tull - Aqualung",
+"America - Ventura Highway",
+"The Monkees - Valleri",
+"Foreigner - Cold As Ice",
+"Fleetwood Mac - Don't Stop",
+"The Move - Blackberry Way",
+"The Tremeloes - Silence Is Golden",
+"Santana - Black Magic Woman",
+"The Hollies - The Air That I Breathe",
+"Carpenters - (They Long to Be) Close to You",
+"Chicago - If You Leave Me Now",
+"Manfred Mann's Earth Band - Spirit In The Night",
+"Bee Gees - Stayin' Alive",
+"The Hollies - Sorry Suzanne",
+"The Hollies - Bus Stop",
+"Carpenters - For All We Know",
+"Bee Gees - Lonely Days",
+"Bee Gees - How Deep Is Your Love",
+"Manfred Mann's Earth Band - Blinded By The Light",
+"Herman's Hermits - There's A Kind Of Hush",
+"The Hollies - Stop Stop Stop",
+"America - I Need You",
+"The Hollies - Long Cool Woman (In a Black Dress)",
+"Bee Gees - Jive Talkin'",
+"Bee Gees - You Should Be Dancing",
+"The Monkees - (I'm Not Your) Steppin' Stone",
+"Bee Gees - Night Fever",
+"The Move - Flowers In the Rain",
+"Bee Gees - To Love Somebody",
+"The Monkees - I'm A Believer",
+"The Mamas and The Papas - Monday, Monday",
+"The Beach Boys - I Can Hear Music",
+"The Beach Boys - I Get Around",
+"The Tremeloes - Suddenly You Love Me",
+"Фредди Меркьюри - The Great Pretender",
+"Bee Gees - Massachusetts",
+"Джон Леннон - Imagine",
+"The Beatles - Let It Be",
+"The Beatles - Come Together",
+"The Beatles - Hey Jude",
+"Uriah Heep - July Morning",
+"The Beatles - Something",
+"Queen - Bohemian Rhapsody",
+"Стиви Уандер - I Just Called to Say I Love You",
+"Джордж Харрисон - I've Got My Mind Set On You",
+"Пол Маккартни - Mrs. Vanderbilt",
+"The Beatles - She Loves You",
+"The Beatles - Here Comes The Sun",
+"The Beatles - While My Guitar Gently Weeps",
+"The Beatles - Michelle",
+"The Beatles - Sgt. Pepper's Lonely Hearts Club Band",
+"Джон Леннон - Happy Xmas (War Is Over)",
+"The Beatles - Girl",
+"The Beatles - Yellow Submarine",
+"Led Zeppelin - Stairway to Heaven",
+"The Beatles - Penny Lane",
+"The Beatles - Help!",
+"The Beatles - Real Love",
+"The Beatles - Free As a Bird",
+"Джордж Харрисон - My Sweet Lord",
+"The Beatles - Back In The USSR",
+"The Beatles - Strawberry Fields Forever",
+"Slade - My Oh My",
+"Ринго Старр - It Don't Come Easy",
+"Slade - Everyday",
+"Ринго Старр - Photograph",
+"The Beatles - A Hard Day's Night",
+"Eagles - Hotel California",
+"The Beatles - All You Need Is Love",
+"Рой Орбисон - Oh, Pretty Woman",
+"The Beatles - Lucy In The Sky With Diamonds",
+"Джон Леннон - Oh My Love",
+"Джон Леннон - Jealous Guy",
+"The Beatles - The Fool On the Hill",
+"The Beatles - A Day in The Life",
+"The Beatles - In My Life",
+"Джон Леннон - Woman",
+"The Beatles - And I Love Her"
 ];
+
+const TOTAL = words.length;
 
 const startScreen = document.getElementById('startScreen');
 const gameScreen = document.getElementById('gameScreen');
@@ -218,13 +356,24 @@ const resultEl = document.getElementById('result');
 const wordEl = document.getElementById('word');
 const historyEl = document.getElementById('history');
 const copyBtn = document.getElementById('copyBtn');
-const minInput = document.getElementById('minInput');
-const maxInput = document.getElementById('maxInput');
+const remainingEl = document.getElementById('remaining');
+
+const copyIcon = `
+<svg viewBox="0 0 24 24">
+<rect x="9" y="9" width="13" height="13" rx="2"/>
+<rect x="3" y="3" width="13" height="13" rx="2"/>
+</svg>`;
+
+const checkIcon = `
+<svg viewBox="0 0 24 24">
+<path d="M5 13l4 4L19 7"/>
+</svg>`;
 
 function startGame(mode) {
     startScreen.style.display = 'none';
     gameScreen.style.display = 'block';
     modeTitle.textContent = mode;
+    updateRemaining();
 }
 
 function backToModes() {
@@ -233,31 +382,25 @@ function backToModes() {
     startScreen.style.display = 'block';
 }
 
-function getKey(min, max) {
-    return `used_${min}_${max}`;
-}
-
 function generate() {
-    const min = +minInput.value;
-    const max = +maxInput.value;
-    if (min < 1 || max > 100 || min >= max) return;
-
-    let used = JSON.parse(sessionStorage.getItem(getKey(min, max))) || [];
-    if (used.length >= (max - min + 1)) return;
+    let used = JSON.parse(sessionStorage.getItem('used')) || [];
+    if (used.length >= TOTAL) return;
 
     let num;
     do {
-        num = Math.floor(Math.random() * (max - min + 1)) + min;
+        num = Math.floor(Math.random() * TOTAL) + 1;
     } while (used.includes(num));
 
     used.push(num);
-    sessionStorage.setItem(getKey(min, max), JSON.stringify(used));
+    sessionStorage.setItem('used', JSON.stringify(used));
 
     resultEl.textContent = num;
     wordEl.textContent = words[num - 1];
+    copyBtn.innerHTML = copyIcon;
     copyBtn.style.display = 'inline';
 
     renderHistory(used);
+    updateRemaining();
 }
 
 function renderHistory(arr) {
@@ -270,19 +413,25 @@ function renderHistory(arr) {
     historyEl.scrollTop = historyEl.scrollHeight;
 }
 
+function updateRemaining() {
+    let used = JSON.parse(sessionStorage.getItem('used')) || [];
+    remainingEl.textContent = TOTAL - used.length;
+}
+
 function resetGame() {
-    sessionStorage.clear();
+    sessionStorage.removeItem('used');
     resultEl.textContent = '—';
     wordEl.textContent = '';
     historyEl.innerHTML = '';
+    remainingEl.textContent = TOTAL;
     copyBtn.style.display = 'none';
 }
 
 function copyWord() {
     if (!wordEl.textContent) return;
     navigator.clipboard.writeText(wordEl.textContent);
-    copyBtn.textContent = '✓';
-    setTimeout(() => copyBtn.textContent = '📋', 1000);
+    copyBtn.innerHTML = checkIcon;
+    setTimeout(() => copyBtn.innerHTML = copyIcon, 1000);
 }
 </script>
 
