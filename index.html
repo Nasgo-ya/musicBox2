@@ -37,6 +37,14 @@ body {
 }
 
 /* ---------- старт ---------- */
+.start-image {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto 25px;
+    display: block;
+    border-radius: 16px;
+}
+
 #startScreen h1 {
     color: #ff5cff;
     margin-bottom: 30px;
@@ -209,6 +217,10 @@ button.main {
 <body>
 
 <div class="screen" id="startScreen">
+    <img src="https://i.postimg.cc/0NDrQcVQ/Gemini-Generated-Image-2cz5y02cz5y02cz5.png"
+         alt="Музыкальное лото"
+         class="start-image">
+
     <h1>Выбери режим</h1>
     <button class="mode-btn" onclick="startGame('Вечеринка')">Вечеринка</button>
     <button class="mode-btn" onclick="startGame('Новый год')">Новый год</button>
